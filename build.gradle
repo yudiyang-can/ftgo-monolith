@@ -1,43 +1,53 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagementPluginVersion"
-    }
-
-    apply plugin: WaitForMySqlPlugin
-}
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id "com.github.ben-manes.versions" version "0.20.0"
+    id "io.github.ben-manes.versions" version "0.66.0"
+    id "org.springframework.boot" apply false
+    id "io.spring.dependency-management" apply false
 }
 
+apply plugin: WaitForMySqlPlugin
 
 subprojects {
 
-    apply plugin: "java"
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    apply plugin: "java-library"
+    apply plugin: "io.spring.dependency-management"
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
 
     group = "net.chrisrichardson.ftgo"
 
     repositories {
         mavenCentral()
-        jcenter()
-
-        // Commenting out problematic repositories that require authentication or are no longer available
-        // eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
-
-        // maven {
-        //     url 'https://repo.spring.io/libs-milestone'
-        // }
 
         maven {
-            url "${project.rootDir}/build/repo"
+            url = "${project.rootDir}/build/repo"
         }
 
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom SpringBootPlugin.BOM_COORDINATES
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        // Spring 6 resolves @PathVariable/@RequestParam names from -parameters metadata only
+        options.compilerArgs << "-parameters"
+    }
+
+    dependencies {
+        testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
     }
 
 }

@@ -12,9 +12,9 @@ if (mirror) {
         }
     }
 
-    settingsEvaluated { settings ->
+    beforeSettings { settings ->
         settings.pluginManagement.repositories {
-            maven { url mirror }
+            maven { url = mirror }
             gradlePluginPortal()
         }
     }

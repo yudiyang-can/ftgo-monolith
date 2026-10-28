@@ -3,8 +3,8 @@
 # Build context must be the repository root:
 #   docker build -f ftgo-application/Dockerfile -t ftgo-application:dev .
 
-ARG BUILDER_IMAGE=eclipse-temurin:8u492-b09-jdk-jammy
-ARG RUNTIME_IMAGE=eclipse-temurin:8u492-b09-jre-jammy
+ARG BUILDER_IMAGE=eclipse-temurin:21.0.12.1_1-jdk-jammy
+ARG RUNTIME_IMAGE=eclipse-temurin:21.0.12.1_1-jre-jammy
 
 FROM ${BUILDER_IMAGE} AS build
 WORKDIR /workspace

@@ -64,8 +64,8 @@ smoke:
 	curl -fsS -o /dev/null '$(APP_URL)/' && echo "UI OK: $(APP_URL)/"
 
 e2e:
-	@"$${JAVA_HOME:+$$JAVA_HOME/bin/}java" -version 2>&1 | grep -q '"1\.8\.' || \
-	  { echo "ERROR: the Gradle build needs Java 8 (set JAVA_HOME to a JDK 8)" >&2; exit 1; }
+	@"$${JAVA_HOME:+$$JAVA_HOME/bin/}java" -version 2>&1 | grep -q 'version "21\.' || \
+	  { echo "ERROR: the Gradle build needs Java 21 (set JAVA_HOME to a JDK 21)" >&2; exit 1; }
 	DOCKER_HOST_IP=localhost ./gradlew :ftgo-end-to-end-tests:cleanTest :ftgo-end-to-end-tests:test
 
 kind-down: tools

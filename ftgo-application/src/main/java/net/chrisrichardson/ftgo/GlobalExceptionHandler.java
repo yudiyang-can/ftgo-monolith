@@ -13,8 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,6 +43,15 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(CourierNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleCourierNotFound(
           CourierNotFoundException ex, HttpServletRequest request) {
+    ErrorResponse error = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage(),
+            request.getRequestURI(), MDC.get("correlationId"));
+    return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNoResourceFound(
+          NoResourceFoundException ex, HttpServletRequest request) {
     ErrorResponse error = new ErrorResponse(
             HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage(),
             request.getRequestURI(), MDC.get("correlationId"));
