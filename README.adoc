@@ -11,7 +11,7 @@ image::http://microservices.io/i/Microservices-Patterns-Cover.png[width=50%]
 
 ## Running locally with Docker Compose
 
-For the inner development loop (JDK 8 and Docker with the Compose plugin):
+For the inner development loop (JDK 21 and Docker with the Compose plugin):
 
 [source,bash]
 ----
@@ -21,7 +21,7 @@ export DOCKER_HOST_IP=localhost
 docker compose down -v           # stop and delete the database volume
 ----
 
-`docker-compose.yml` runs three services: `mysql`, a one-shot `ftgo-flyway` that applies the migrations in `ftgo-flyway/src/main/resources/db/migration`, and `ftgo-application`, which starts only after the migrations succeed. The app listens on http://localhost:8081 (health: `/actuator/health`, API docs: `/swagger-ui.html`).
+`docker-compose.yml` runs three services: `mysql`, a one-shot `ftgo-flyway` that applies the migrations in `ftgo-flyway/src/main/resources/db/migration`, and `ftgo-application`, which starts only after the migrations succeed. The app listens on http://localhost:8081 (health: `/actuator/health`, API docs: `/swagger-ui.html`, OpenAPI JSON: `/v3/api-docs`).
 
 ## Deploying to Kubernetes with Helm
 
@@ -30,14 +30,14 @@ The chart's local target is a https://kind.sigs.k8s.io[kind] cluster; see `deplo
 
 ### Prerequisites
 
-Docker (daemon running), kind v0.24, kubectl v1.31 (±1 minor), Helm v3.16, and JDK 8 for the end-to-end tests.
+Docker (daemon running), kind v0.24, kubectl v1.31 (±1 minor), Helm v3.16, and JDK 21 for the end-to-end tests.
 `make tools` checks them. Host port 8081 must be free.
 
 ### Deploy
 
 [source,bash]
 ----
-export JAVA_HOME=/path/to/jdk8
+export JAVA_HOME=/path/to/jdk21
 make kind-demo      # create the kind cluster, build + load the images, helm upgrade --install --wait, smoke test, e2e tests
 ----
 

@@ -18,7 +18,7 @@ The versions are pinned in the `Makefile`, and every cluster target checks them 
 | kind    | v0.24.0                          | same major.minor                                    |
 | kubectl | v1.31.0                          | within one minor version (Kubernetes skew policy)   |
 | Helm    | v3.16.2                          | same major.minor                                    |
-| JDK     | 8 (`JAVA_HOME`)                  | `make e2e` only; the Gradle 4.10 build needs Java 8 |
+| JDK     | 21 (`JAVA_HOME`)                 | `make e2e` only; the Gradle 8 build needs Java 21   |
 
 Host port 8081 must be free.
 

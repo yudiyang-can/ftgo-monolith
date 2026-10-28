@@ -3,10 +3,9 @@ package net.chrisrichardson.ftgo.endtoendtests.common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import io.eventuate.util.test.async.Eventually;
+import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
 import net.chrisrichardson.ftgo.common.Address;
 import net.chrisrichardson.ftgo.common.Money;
 import net.chrisrichardson.ftgo.common.MoneyModule;
@@ -23,11 +22,14 @@ import net.chrisrichardson.ftgo.restaurantservice.events.RestaurantMenuDTO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -128,7 +130,7 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void verifyOrderRevised(int orderId) {
-    Eventually.eventually(String.format("verifyOrderRevised state %s", orderId), () -> {
+    eventually(String.format("verifyOrderRevised state %s", orderId), () -> {
       String orderTotal = given().
               when().
               get(baseUrl(getApplicationPort(), "orders", Integer.toString(orderId))).
@@ -138,7 +140,7 @@ public abstract class AbstractEndToEndTests {
                       path("orderTotal");
       assertEquals(priceOfChickenVindaloo.multiply(revisedQuantityOfChickenVindaloo).asString(), orderTotal);
     });
-    Eventually.eventually(String.format("verifyOrderRevised state %s", orderId), () -> {
+    eventually(String.format("verifyOrderRevised state %s", orderId), () -> {
       String state = given().
               when().
               get(orderBaseUrl(Integer.toString(orderId))).
@@ -182,7 +184,7 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void verifyOrderCancelled(int orderId) {
-    Eventually.eventually(String.format("verifyOrderCancelled %s", orderId), () -> {
+    eventually(String.format("verifyOrderCancelled %s", orderId), () -> {
       String state = given().
               when().
               get(orderBaseUrl(Integer.toString(orderId))).
@@ -241,7 +243,7 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void verifyRestaurantCreated(int restaurantId) {
-    Eventually.eventually(String.format("verifyRestaurantCreated %s", restaurantId), () ->
+    eventually(String.format("verifyRestaurantCreated %s", restaurantId), () ->
             given().
                     when().
                     get(restaurantBaseUrl(Integer.toString(restaurantId))).
@@ -266,7 +268,7 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void verifyOrderAuthorized(int orderId) {
-    Eventually.eventually(String.format("verifyOrderApproved %s", orderId), () -> {
+    eventually(String.format("verifyOrderApproved %s", orderId), () -> {
       String state = given().
               when().
               get(orderBaseUrl(Integer.toString(orderId))).
@@ -279,7 +281,7 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void verifyOrderHistoryUpdated(int orderId, int consumerId) {
-    Eventually.eventually(String.format("verifyOrderHistoryUpdated %s", orderId), () -> {
+    eventually(String.format("verifyOrderHistoryUpdated %s", orderId), () -> {
       String state = given().
               when().
               get(orderBaseUrl() + "?consumerId=" + consumerId).
@@ -325,7 +327,8 @@ public abstract class AbstractEndToEndTests {
   }
 
   private void assertOrderAssignedToCourier() {
-    int courierId = Eventually.eventuallyReturning(() -> {
+    AtomicInteger assignedCourierId = new AtomicInteger();
+    eventually("assertOrderAssignedToCourier", () -> {
       int assignedCourier = given().
               when().
               get(orderBaseUrl(Long.toString(orderId))).
@@ -336,8 +339,9 @@ public abstract class AbstractEndToEndTests {
               .extract()
               .path("assignedCourier");
       assertThat(assignedCourier).isGreaterThan(0);
-      return assignedCourier;
+      assignedCourierId.set(assignedCourier);
     });
+    int courierId = assignedCourierId.get();
 
     given().
             when().
@@ -379,6 +383,13 @@ public abstract class AbstractEndToEndTests {
             post(orderBaseUrl(Long.toString(orderId), "delivered")).
             then().
             statusCode(200);
+  }
+
+  private static void eventually(String description, Runnable assertion) {
+    await(description)
+            .atMost(Duration.ofSeconds(30))
+            .pollInterval(Duration.ofMillis(500))
+            .untilAsserted(assertion::run);
   }
 
   public abstract String getHost();

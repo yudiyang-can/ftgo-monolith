@@ -105,7 +105,7 @@
 ## Phase 3 — Service Layer (Requires Mockito)
 
 > Modules: `ftgo-order-service`, `ftgo-consumer-service`, `ftgo-courier-service`  
-> Add `testCompile "org.mockito:mockito-core:2.23.4"` where not already present via spring-boot-starter-test.
+> Add `testImplementation "org.mockito:mockito-core"` where not already present via spring-boot-starter-test.
 
 ### 3.1 `OrderServiceTest`
 **File:** `ftgo-order-service/src/test/java/.../domain/OrderServiceTest.java`
@@ -247,7 +247,7 @@ Phase 5  →  Mock HttpServletRequest/Response (spring-test)
 
 **`ftgo-domain/build.gradle`** — add Mockito for Phase 1 helper tests:
 ```groovy
-testCompile "org.mockito:mockito-core:2.23.4"
+testImplementation "org.mockito:mockito-core"
 ```
 
 No other dependency changes needed — the other modules already pull in `spring-boot-starter-test` which includes JUnit 4, Mockito, Hamcrest, and Spring Test.

@@ -1,10 +1,17 @@
 version:               2
 jobs:
   build:
-    machine:           true
+    machine:
+      image:           ubuntu-2204:current
     working_directory: ~/ftgo-monolith
     steps:
       - checkout
+      - run:
+          name:        Install JDK 21
+          command:     |
+            curl -fsSL -o /tmp/jdk21.tar.gz "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse"
+            mkdir -p ~/jdk21 && tar xzf /tmp/jdk21.tar.gz -C ~/jdk21 --strip-components=1
+            echo 'export JAVA_HOME=$HOME/jdk21; export PATH=$JAVA_HOME/bin:$PATH' >> "$BASH_ENV"
       - restore_cache:
           key:         ftgo-monolith-{{ checksum "gradle.properties" }}
       - run:           TERM=dumb ./gradlew testClasses

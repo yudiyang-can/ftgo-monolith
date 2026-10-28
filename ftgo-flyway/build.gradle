@@ -1,5 +1,14 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.flywaydb:flyway-mysql:10.17.3"
+    }
+}
+
 plugins {
-    id "org.flywaydb.flyway" version "6.0.0"
+    id "org.flywaydb.flyway" version "10.17.3"
 }
 
 flyway {
